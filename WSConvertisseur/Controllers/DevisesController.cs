@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WSConvertisseur.Models;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace WSConvertisseur.Controllers
 {
@@ -9,90 +7,119 @@ namespace WSConvertisseur.Controllers
     [ApiController]
     public class DevisesController : ControllerBase
     {
-        // "static" permet de conserver les données tant que l'API tourne
-        private static List<Devise> lesDevises;
-
-        // Constructeur : initialise la liste si elle est vide
-        public DevisesController()
+        // Liste statique pour simuler une base de données (persistance tant que l'API tourne)
+        private static List<Devise> devises = new List<Devise>
         {
-            if (lesDevises == null)
-            {
-                lesDevises = new List<Devise>
-                {
-                    new Devise(1, "Dollar", 1.08),
-                    new Devise(2, "Franc Suisse", 0.95),
-                    new Devise(3, "Yen", 140.25)
-                };
-            }
-        }
+            new Devise(1, "Dollar", 1.08),
+            new Devise(2, "Franc Suisse", 1.07),
+            new Devise(3, "Yen", 120)
+        };
 
-        // GET: api/Devises
+        /// <summary>
+        /// Récupère toutes les devises.
+        /// </summary>
+        /// <returns>La liste complète des devises</returns>
+        /// <response code="200">Retourne la liste des devises</response>
         [HttpGet]
+        [ProducesResponseType(200)]
         public IEnumerable<Devise> GetAll()
         {
-            return lesDevises;
+            return devises;
         }
 
-        // GET: api/Devises/5
+        /// <summary>
+        /// Récupère une devise spécifique par son ID.
+        /// </summary>
+        /// <param name="id">L'identifiant de la devise recherchée</param>
+        /// <returns>La devise correspondante ou une erreur 404</returns>
+        /// <response code="200">La devise a été trouvée</response>
+        /// <response code="404">Aucune devise trouvée avec cet ID</response>
         [HttpGet("{id}", Name = "GetDevise")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
         public ActionResult<Devise> GetById(int id)
         {
-            Devise devise = lesDevises.FirstOrDefault(d => d.Id == id);
-
+            Devise? devise = devises.FirstOrDefault(d => d.Id == id);
             if (devise == null)
             {
                 return NotFound();
             }
-            return devise;
+            return Ok(devise);
         }
 
-        // POST: api/Devises
+        /// <summary>
+        /// Ajoute une nouvelle devise.
+        /// </summary>
+        /// <param name="devise">L'objet devise à ajouter (le JSON dans le corps de la requête)</param>
+        /// <returns>La devise créée avec son URI d'accès</returns>
+        /// <response code="201">La devise a été créée avec succès</response>
+        /// <response code="400">Le modèle de la devise est invalide (ex: champs manquants)</response>
         [HttpPost]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
         public ActionResult<Devise> Post([FromBody] Devise devise)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
-            // Ajout simple (l'ID devrait idéalement être géré auto, mais on suit le TP)
-            lesDevises.Add(devise);
-
-            // Retourne 201 Created avec l'URL de la ressource créée
+            devises.Add(devise);
+            // Retourne un code 201 Created avec l'URL pour récupérer la ressource (GetDevise)
             return CreatedAtRoute("GetDevise", new { id = devise.Id }, devise);
         }
 
-        // PUT: api/Devises/5
+        /// <summary>
+        /// Modifie une devise existante.
+        /// </summary>
+        /// <param name="id">L'ID de la devise à modifier (doit correspondre à l'ID dans le corps)</param>
+        /// <param name="devise">L'objet devise avec les nouvelles valeurs</param>
+        /// <returns>Rien (204 No Content) si réussi</returns>
+        /// <response code="204">Mise à jour réussie</response>
+        /// <response code="400">L'ID de l'URL ne correspond pas à l'ID du corps ou modèle invalide</response>
+        /// <response code="404">La devise à modifier n'existe pas</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public ActionResult Put(int id, [FromBody] Devise devise)
         {
             if (id != devise.Id)
             {
                 return BadRequest();
             }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            int index = lesDevises.FindIndex(d => d.Id == id);
+            int index = devises.FindIndex((d) => d.Id == id);
             if (index < 0)
             {
                 return NotFound();
             }
-
-            lesDevises[index] = devise;
+            devises[index] = devise;
             return NoContent();
         }
 
-        // DELETE: api/Devises/5
+        /// <summary>
+        /// Supprime une devise.
+        /// </summary>
+        /// <param name="id">L'identifiant de la devise à supprimer</param>
+        /// <returns>La devise supprimée ou 404</returns>
+        /// <response code="200">Suppression réussie, retourne la devise supprimée</response>
+        /// <response code="404">La devise à supprimer n'existe pas</response>
         [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public ActionResult<Devise> Delete(int id)
         {
-            Devise devise = lesDevises.FirstOrDefault(d => d.Id == id);
+            Devise? devise = devises.FirstOrDefault(d => d.Id == id);
             if (devise == null)
             {
                 return NotFound();
             }
-
-            lesDevises.Remove(devise);
-            return NoContent(); // Code 204
+            devises.Remove(devise);
+            return Ok(devise);
         }
     }
 }
