@@ -1,24 +1,26 @@
-﻿namespace WSConvertisseur.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WSConvertisseur.Models
 {
     public class Devise
     {
-        private int id;
-        private string nomdevise;
-        private double taux;
+        public int Id { get; set; }
+
+        [Required]
+        public string NomDevise { get; set; }
+
+        public double Taux { get; set; }
 
         public Devise()
         {
+            // Constructeur vide requis pour la sérialisation
         }
 
-        public Devise(int id, string nomdevise, double taux)
+        public Devise(int id, string nomDevise, double taux)
         {
-            this.Id = id;
-            this.Nomdevise = nomdevise;
-            this.Taux = taux;
+            Id = id;
+            NomDevise = nomDevise;
+            Taux = taux;
         }
-
-        public int Id { get => id; set => id = value; }
-        public string Nomdevise { get => nomdevise; set => nomdevise = value; }
-        public double Taux { get => taux; set => taux = value; }
     }
 }
