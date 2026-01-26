@@ -43,15 +43,12 @@ namespace WSConvertisseur.Controllers.Tests
             var result = _controller.GetById(1);
 
             // Assert
-            Assert.IsInstanceOfType(result, typeof(ActionResult<Devise>));
+            Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
             var okResult = result.Result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
 
-            var item = okResult.Value as Devise;
-            Assert.IsNotNull(item);
-            Assert.AreEqual(1, item.Id);
-            Assert.AreEqual("Dollar", item.NomDevise);
+            // Plus besoin de vérifier les propriétés une par une grâce au Equals ajouté dans Devise
+            var expectedItem = new Devise(1, "Dollar", 1.08);
+            Assert.AreEqual(expectedItem, okResult.Value, "L'objet retourné n'est pas identique à celui attendu.");
         }
 
         [TestMethod]
